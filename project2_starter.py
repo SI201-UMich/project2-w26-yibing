@@ -40,19 +40,19 @@ def load_listing_results(html_path) -> list[tuple]:
     # TODO: Implement checkout logic following the instructions
     # ==============================
     # YOUR CODE STARTS HERE
+    # ==============================
     newlst = []
-    with open(html_path, 'r', encoding = 'utf-8-sig') as file:
+    with open(html_path, "r", encoding = "utf-8-sig") as file:
         this = file.read()
-        soup = BeautifulSoup(this, 'html.parser')
-        all_divs = soup.find_all('div', class_ = 't1jojoys')
+        soup = BeautifulSoup(this, "html.parser")
+        all_divs = soup.find_all("div", class_ = "t1jojoys")
         for div in all_divs:
-            id1 = div.get('id', None)
+            id1 = div.get("id", None)
             name = div.get_text(strip=True)
             if re.match(r"^title_",id1) and name:
                 id1 = id1[6:]
                 newlst.append((name, id1))
         return newlst
-    # ==============================
     # ==============================
     # YOUR CODE ENDS HERE
     # ==============================
@@ -81,7 +81,56 @@ def get_listing_details(listing_id) -> dict:
     # ==============================
     # YOUR CODE STARTS HERE
     # ==============================
-    pass
+    dic = {}
+    dic[str(listing_id)] = {}
+    path = "/Users/yibing_ronnieq/Documents/SI201/project2-w26-yibing/html_files"
+    path = os.path.join(path, ("listing_" + str(listing_id)))
+    with open(path, "r", encoding="utf-8-sig") as file:
+        this = file.read()
+        soup = BeautifulSoup(this, "html.parser")
+        lst = soup.find(["div", "span"])
+        superhost = 0
+        dic[str(listing_id)]["location_rating"] = float(0.0)
+        for i in lst.get_text(strip=True):
+            #policy number
+            policy = re.match(r"^Policy[\s\u00A0]number:(.+)$", i)
+            if policy:
+                if policy.group(1) == re.match(r"^STR",policy) or policy.group(1) == re.match(r"^2022.+STR$",policy):
+                    dic[str(listing_id)]["policy_number"] = policy.group(1)
+                elif policy.group(1).lower().strip() == "pending":
+                    dic[str(listing_id)]["policy_number"] = "Pending"
+                elif policy.group(1).lower().strip() == "exempt":
+                    dic[str(listing_id)]["policy_number"] = "Exempt"
+                else:
+                    dic[str(listing_id)]["policy_number"] = "Pending"
+            #host
+            if re.match(r".+is[\s\u00A0]a[\s\u00A0]Superhost$", i):
+                superhost += 1
+            #name and room
+            nameset = re.match(r"^(.+)[\s\u00A0]hosted[\s\u00A0]by[\s\u00A0]([A-Za-z]+)$")
+            if nameset:
+                name = nameset.group(2)
+                if re.search(r"(\b&\b) | (\b(and)\b) | (\b(And)\b)", name):
+                    name = re.sub(r"(\b&\b)", "And", name)
+                    name = re.sub(r"(\b&\b)", "And", name)
+                    dic[str(listing_id)]["host_name"] = name
+                else:
+                    dic[str(listing_id)]["host_name"] = name
+                room = nameset.group(1)
+                if re.search(r"shared", room.lower()):
+                    dic[str(listing_id)]["room_type"] = "Shared Room"
+                elif re.search(r"private", room.lower()):
+                    dic[str(listing_id)]["room_type"] = "Private Room"
+                else:
+                    dic[str(listing_id)]["room_type"] = "Entire Room"
+        lst = soup.find_all(class_='_12si43g')
+        if lst:
+            dic[str(listing_id)]["location_rating"] = float(lst.get_text(strip=True))
+        if superhost >= 1:
+            dic[str(listing_id)]["host_type"] = "Superhost"
+        else:
+            dic[str(listing_id)]["host_type"] = "regular"
+
     # ==============================
     # YOUR CODE ENDS HERE
     # ==============================
