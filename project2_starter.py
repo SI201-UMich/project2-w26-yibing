@@ -130,7 +130,7 @@ def get_listing_details(listing_id) -> dict:
             dic[str(listing_id)]["host_type"] = "Superhost"
         else:
             dic[str(listing_id)]["host_type"] = "regular"
-
+        return dic
     # ==============================
     # YOUR CODE ENDS HERE
     # ==============================
@@ -151,7 +151,12 @@ def create_listing_database(html_path) -> list[tuple]:
     # ==============================
     # YOUR CODE STARTS HERE
     # ==============================
-    pass
+    lst = load_listing_results(html_path)
+    returnlst = []
+    for i in lst:
+        dic = get_listing_details(i[1])
+        returnlst.append((i[0], i[1], dic[i[1]]["policy_number"], dic[i[1]]["host_type"], dic[i[1]]["host_name"], dic[i[1]]["room_type"], dic[i[1]]["location_rating"]))
+    return returnlst
     # ==============================
     # YOUR CODE ENDS HERE
     # ==============================
