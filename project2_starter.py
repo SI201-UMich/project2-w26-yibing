@@ -83,8 +83,8 @@ def get_listing_details(listing_id) -> dict:
     # ==============================
     dic = {}
     dic[str(listing_id)] = {}
-    path = "/Users/yibing_ronnieq/Documents/SI201/project2-w26-yibing/html_files"
-    path = os.path.join(path, ("listing_" + str(listing_id)))
+    path = "/Users/yibing_ronnieq/Documents/SI201/project2-w26-yibing"
+    path = os.path.join(path, ("listing_" + "html_files" + str(listing_id)))
     with open(path, "r", encoding="utf-8-sig") as file:
         this = file.read()
         soup = BeautifulSoup(this, "html.parser")
@@ -179,7 +179,13 @@ def output_csv(data, filename) -> None:
     # ==============================
     # YOUR CODE STARTS HERE
     # ==============================
-    pass
+    with open(filename, "w", encoding="utf-8-sig") as file:
+        writer = csv.writer(file)
+        writer.writerrow(["Listing Title", "Listing ID", "Policy Number", 
+               "Host Type", "Host Name", "Room Type", "Location Rating"])
+        lst = sorted(data, key=lambda x:x[6], reverse=True)
+        writer.writerows(lst)
+    
     # ==============================
     # YOUR CODE ENDS HERE
     # ==============================
