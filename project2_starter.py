@@ -40,8 +40,19 @@ def load_listing_results(html_path) -> list[tuple]:
     # TODO: Implement checkout logic following the instructions
     # ==============================
     # YOUR CODE STARTS HERE
+    newlst = []
+    with open(html_path, 'r', encoding = 'utf-8-sig') as file:
+        this = file.read()
+        soup = BeautifulSoup(this, 'html.parser')
+        all_divs = soup.find_all('div', class_ = 't1jojoys')
+        for div in all_divs:
+            id1 = div.get('id', None)
+            name = div.get_text(strip=True)
+            if re.match(r"^title_",id1) and name:
+                id1 = id1[6:]
+                newlst.append((name, id1))
+        return newlst
     # ==============================
-    pass
     # ==============================
     # YOUR CODE ENDS HERE
     # ==============================
