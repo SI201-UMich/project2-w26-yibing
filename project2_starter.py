@@ -89,7 +89,7 @@ def get_listing_details(listing_id) -> dict:
         this = file.read()
         soup = BeautifulSoup(this, "html.parser")
         #policy number
-        poli = soup.find_all(class_='ll4r2nl')
+        poli = soup.find_all(class_="ll4r2nl")
         for i in poli:
             policy = re.match(r"^STR.+$", i.get_text(strip=True)) or re.match(r"^2022.+STR$", i.get_text(strip=True))
             if policy:
@@ -103,10 +103,34 @@ def get_listing_details(listing_id) -> dict:
             policy = None
         if dic[str(listing_id)].get("policy_number", None) == None:
             dic[str(listing_id)]["policy_number"] = "Pending"
-        #host
+        #superhost
+        super_h = soup.find_all(class_="_1qsawv5")
+        if super_h:
+            for i in super_h:
+                if re.match(r"^.+\sis\sa\sSuperhost$", i.get_text(strip=True)):
+                    dic[str(listing_id)]["host_type"] = "Superhost"
+        if dic[str(listing_id)].get("host_type", None) == None:
+            dic[str(listing_id)]["host_type"] = "regular"
         #name and room
+        n_r = soup.find_all(class_=["_14i3z6h", "hnwb2pb"])
+        for i in n_r:
+            theresult = re.match(r"^(.*)[Hh]osted\sby\s(.+)$", i.get_text(strip=True))
+            if theresult:
+                #name
+                name = theresult.group(2)
+                name = re.sub(r"(\b&\b) | (\band\b)", "And", name)
+                dic[str(listing_id)]["host_name"] = name
+                #room
+                room = theresult.group(1)
+                if re.search(r"\bprivate\b", room.lower().strip()):
+                    dic[str(listing_id)]["room_type"] = "Private Room"
+                elif re.search(r"\bshared\b", room.lower().strip()):
+                    dic[str(listing_id)]["room_type"] = "Shared Room"
+                else:
+                    dic[str(listing_id)]["room_type"] = "Entire Room"
+                
         #rating
-        lst = soup.find(class_='_12si43g')
+        lst = soup.find(class_="_12si43g")
         if lst:
             a = lst.get_text(strip=True)
             dic[str(listing_id)]["location_rating"] = float(a[0:3])
